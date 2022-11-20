@@ -27,32 +27,36 @@ export default createEslintRule<[], MESSAGE_ID>({
 				return;
 			}
 
-			if (expression.body.body.some((n) => n.type === "IfStatement")) {
+
+			// check if the test function contains if statements
+			if (expression.body.body.some((statement) => statement.type === "IfStatement")) {
 				context.report({
 					node,
 					messageId: "noConditionalTests",
-				})
+				});
 			}
 
-			// check if there is ternary operator in the test
-			if (expression.body.body.some((n) => n.type === "ExpressionStatement" && n.expression.type === "CallExpression")) {
+
+			// check if test contains switch statements
+			if (expression.body.body.some((statement) => statement.type === "SwitchStatement")) {
 				context.report({
 					node,
 					messageId: "noConditionalTests",
-				})
+				});
 			}
 
-			// check if there is a switch statement in the test
-			if (expression.body.body.some((n) => n.type === "SwitchStatement")) {
+			// test if body of function contains a ternary statement
+			if (expression.body.body.some((statement) => statement.type === "ExpressionStatement" && statement.expression.type === "Literal")) {
 				context.report({
 					node,
 					messageId: "noConditionalTests",
-				})
+				});
 			}
+
 		}
 
 		return {
-			"CallExpression[callee.name=/^(it|test)$/]"(node: TSESTree.CallExpression) {
+			"CallExpression[callee.name=/^(it|test|describe)$/]"(node: TSESTree.CallExpression) {
 				checkConditionalTest(node)
 			}
 		}
